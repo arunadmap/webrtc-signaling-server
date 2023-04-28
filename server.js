@@ -20,6 +20,6 @@ io.on('connection', (socket) => {
     });
   });
 
-server.listen(3030, () => {
-  console.log('listening on *:3030');
+server.listen(3000, () => {
+  console.log('listening on *:3000');
 });
