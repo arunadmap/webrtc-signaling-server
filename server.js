@@ -9,41 +9,21 @@ const io = require("socket.io")(server, {
   }
 });
 
-const PORT = process.env.PORT || 8000;
 
-const peers = {};
 
-io.on('connection', socket => {
-  socket.on('sdp', sdp => {
-    console.log('sdp',sdp);
-    socket.broadcast.emit('sdp', sdp);
-  });
+// serve static files from the "public" directory
+app.use(express.static('public'));
 
-  socket.on('iceCandidate', candidate => {
-    socket.broadcast.emit('iceCandidate', candidate);
-  });
-
-  socket.on('joinRoom', room => {
-    socket.join(room);
-    peers[socket.id] = room;
-
-    const otherPeers = Object.keys(peers)
-      .filter(id => peers[id] === room && id !== socket.id);
-
-    socket.emit('otherPeers', otherPeers);
-    socket.broadcast.to(room).emit('newPeer', socket.id);
-  });
-
-  socket.on('disconnect', () => {
-    const room = peers[socket.id];
-
-    if (room) {
-      delete peers[socket.id];
-      io.to(room).emit('peerDisconnected', socket.id);
-    }
+// when a new client connects, listen for the "stream" event
+io.on('connection', (socket) => {
+  socket.on('stream', (dataUrl) => {
+    console.log("dataURL coming");
+    // broadcast the received stream to all connected clients
+    socket.broadcast.emit('stream', dataUrl);
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+// start the server and listen for incoming requests
+server.listen(8000, () => {
+  console.log('Server started on port 8000');
 });
